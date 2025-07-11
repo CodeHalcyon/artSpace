@@ -1,0 +1,26 @@
+# Core dependencies
+Django>=4.2
+djangorestframework>=3.14
+mysqlclient>=2.2.0  # OR use pymysql if mysqlclient causes issues
+python-dotenv>=1.0.1
+
+# AWS tools
+boto3>=1.34.0
+
+# Filtering and search
+django-filter>=23.3
+
+# Image support
+Pillow>=10.0.0
+
+# CORS support
+django-cors-headers>=4.2
+
+# Authentication
+djangorestframework-simplejwt>=5.3.1
+
+# For local development (optional)
+python-decouple>=3.8
+
+# Optional: if you're using pymysql instead of mysqlclient
+pymysql>=1.1.0
