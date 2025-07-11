@@ -1,26 +1,23 @@
+import os
+import json
+from pathlib import Path
+from dotenv import load_dotenv
+from datetime import timedelta
 import pymysql
+
 pymysql.install_as_MySQLdb()
 
-from pathlib import Path
+# Load .env variables
+load_dotenv()
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# SECURITY
+SECRET_KEY = os.getenv("SECRET_KEY")
+DEBUG = os.getenv("DEBUG") == "True"
+ALLOWED_HOSTS = json.loads(os.getenv("ALLOWED_HOSTS", '["localhost"]'))
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-41r*v#*8ua93i!2qamo8zsy_j5ui@8m!3km4^*uoa#8fg8260b'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = []
-
-
-# Application definition
-
+# Applications
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -47,7 +44,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.security.SecurityMiddleware',
 ]
 
 ROOT_URLCONF = 'artispace.urls'
@@ -69,24 +65,22 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'artispace.wsgi.application'
 
-
 # Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'artispace_db',
-        'USER': 'admin',
-        'PASSWORD': 'Atispace123',
-        'HOST': 'artispace-db-instance-1.c8t6cocsemau.us-east-1.rds.amazonaws.com',
-        'PORT': '3306',
-        'OPTIONS': {
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
-        }
+        'ENGINE': os.getenv("DB_ENGINE"),
+        'NAME': os.getenv("DB_NAME"),
+        'USER': os.getenv("DB_USER"),
+        'PASSWORD': os.getenv("DB_PASSWORD"),
+        'HOST': os.getenv("DB_HOST"),
+        'PORT': os.getenv("DB_PORT"),
     }
 }
 
+# Custom user model
+AUTH_USER_MODEL = 'users.User'
+
+# REST Framework
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
@@ -95,62 +89,47 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10,
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',  # okay to keep
+        'rest_framework.permissions.IsAuthenticated',
     ]
 }
 
+# JWT
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=int(os.getenv("ACCESS_TOKEN_LIFETIME_MINUTES", 60))),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=int(os.getenv("REFRESH_TOKEN_LIFETIME_DAYS", 1))),
+}
+
+# AWS S3
+AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME")
+AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME")
+AWS_S3_CUSTOM_DOMAIN = os.getenv("AWS_S3_CUSTOM_DOMAIN")
+MEDIA_URL = os.getenv("MEDIA_URL")
+MEDIA_ROOT = os.getenv("MEDIA_ROOT")
+
+# Static files
+STATIC_URL = 'static/'
+
+# Internationalization
+LANGUAGE_CODE = 'en-us'
+TIME_ZONE = os.getenv("TIME_ZONE", "UTC")
+USE_I18N = True
+USE_TZ = True
+
+# Email
+EMAIL_BACKEND = os.getenv("EMAIL_BACKEND")
+EMAIL_HOST = os.getenv("EMAIL_HOST")
+EMAIL_PORT = int(os.getenv("EMAIL_PORT", 587))
+EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS") == "True"
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
+
+# Default primary key field
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# CORS (development)
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
 ]
-
-AWS_ACCESS_KEY_ID = 'AKIASK5MCDOHAF7EZEVD'
-AWS_SECRET_ACCESS_KEY = 'Y1s0TJQ/15nfrGhwNLiK62J/4SmXFvsOMV02fr9N'
-AWS_STORAGE_BUCKET_NAME = 'atispace-assets'
-AWS_S3_REGION_NAME = 'us-east-1'  # or your chosen region
-AWS_S3_ENDPOINT_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
-
-
-CORS_ALLOW_ALL_ORIGINS = True  # 🚨 Only use this for local dev/testing
-
-AUTH_USER_MODEL = 'users.User'
-
-# Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
-
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
-]
-
-
-# Internationalization
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
-
-LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'UTC'
-
-USE_I18N = True
-
-USE_TZ = True
-
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
-
-STATIC_URL = 'static/'
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
-
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+CORS_ALLOW_ALL_ORIGINS = True  # Only for dev
